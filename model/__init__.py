@@ -17,6 +17,8 @@ class Video:
             return self.rootfile != None
     
     def exists(self):
+        if os.path.exists(os.path.abspath(f"{Config.OUTPUT}/{self.descricao}.webm")):
+            return True
         return self.file != None
     
     def download(self):
@@ -40,7 +42,7 @@ class Video:
         sarquivo = ".".join(sarquivo)
 
         src = os.path.abspath("/".join([tmp_dir, arquivo]))
-        dest = os.path.abspath("/".join(['videos',sarquivo]))
+        dest = os.path.abspath("/".join([Config.OUTPUT, sarquivo]))
 
         shutil.move(src, dest)
         shutil.rmtree(tmp_dir)
@@ -50,14 +52,10 @@ class Video:
     
     def process(self):
         if (self.rootfile == None): self.rootfile = f"{self.root}.webm"
-        file = os.path.abspath("/".join([Config.OUTPUT, self.root]))
+        file = os.path.abspath("/".join([Config.OUTPUT, f"{self.root}.webm"]))
         cut = MyCut(file, self.start, self.end)
         cut.save(self.descricao)
 
 
 class Config:
     OUTPUT = 'videos'
-
-    # @staticmethod
-    # def getOutput(self):
-    #     return Config.OUTPUT

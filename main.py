@@ -1,9 +1,9 @@
 from utils.prep import MyCut
+from model import Video
 import yt_dlp
 import random
 import shutil
 import time
-from model import Video
 import os
 
 # Lê roteiro.raw
@@ -34,8 +34,7 @@ def nmain():
         video.link = parse[1]
         video.start = parse[2]
         video.end  = parse[3]
-        video.descricao = "_".join(parse[4:(len(parse))]).replace("\n","").replace("?","").replace(".","")
-        breakpoint()
+        video.descricao = "_".join(parse[4:(len(parse))]).replace("\r\n","").replace("\n","").replace("?","").replace(",","").replace(".","")
         lista.append(video)
 
     for video in lista:

@@ -3,7 +3,7 @@ from model import Video
 import yt_dlp
 import random
 import shutil
-import time
+import sys
 import os
 
 # Lê roteiro.raw
@@ -20,8 +20,8 @@ def main():
         step2(link, desc)
         step3(desc, init, end)
 
-def nmain():
-    roteiro = open("roteiro.raw", "r", encoding="UTF-8")
+def nmain(froteiro):
+    roteiro = open(froteiro, "r", encoding="UTF-8")
     content = roteiro.readlines()
     lista = []
 
@@ -86,4 +86,4 @@ def step3(FILE, init, fim, desc):
 
 if __name__ == "__main__":
     # step2(URL='https://www.youtube.com/watch?v=hbXljW9FnCc', filename="teste")
-    nmain()
+    nmain(sys.argv[1])

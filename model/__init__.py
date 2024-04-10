@@ -1,8 +1,10 @@
 from utils.prep import MyCut
 from moviepy.editor import *
+from PIL import Image
 import yt_dlp
 import random
 import shutil
+import math
 import os
 
 class Video:
@@ -139,6 +141,9 @@ class MontagemBuilder:
         if self.cmd == 'concat':
             video = VideoFileClip(f"{Config.OUTPUT}/{filename}.webm")
             self.scope.add(video)
+        elif self.cmd == 'array':
+            video = VideoFileClip(f"{Config.OUTPUT}/{filename}.webm")
+            self.scope.add(video)
         pass
     def compile(self):
         self.scope.compile(self.output)
@@ -176,7 +181,35 @@ class MontagemConcat(Montagem):
 
 class MontagemArray(Montagem):
     def __init__(self):
+        super().__init__()
         pass
+    def compile(self, output):
+        lado = math.floor(math.sqrt(len(self.repo)))
+        repo = []
+        for x in range(lado):
+            inner = []
+            for y in range(lado):
+                inner.append(self.repo[(x+1)*(y)])
+            repo.append(inner)
+
+        mWidth = 0
+        mHeight = 0
+
+        for x in range(lado):
+            for y in range(lado):
+                width = repo[x][y].size[0]
+                height = repo[x][y].size[1]
+                if width > mWidth:
+                    mWidth = width
+                if height > mHeight:
+                    mHeight = height
+                
+        for x in range(lado):
+            for y in range(lado):
+                repo[x][y] = repo[x][y].resize(width=mWidth)
+
+        result = clips_array(repo)
+        result.write_videofile(f"{Config.OUTPUT}/{output}.webm")
 
 
 

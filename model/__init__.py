@@ -80,7 +80,6 @@ class Cut:
             else:
                 arquivo = f"{item}.webm"
                 if not os.path.exists(os.path.abspath(f"{Config.OUTPUT}/{arquivo}")):
-                    breakpoint()
                     raise FileNotFoundError(f"Arquivo {arquivo} não encontrado em /{Config.OUTPUT}/!")
                 arquivos.append(arquivo)
         self.arquivos = arquivos
@@ -101,10 +100,83 @@ class Cut:
 
 
 
+class MontagemBuilder:
+    def __init__(self):
+        self.cmd = None
+        self.montagem = None
+        self.scope = None
+
+    def state(self, cmd):
+        stream = cmd.split(" ")
+        self.cmd = stream[0]
+        self.output = None
+        if len(stream) > 1:
+            self.output = stream[1]
+        pass
+
+    def openScope(self):
+        child = None
+        if self.cmd == 'concat':
+            child = MontagemConcat()
+        elif self.cmd == 'array':
+            child = MontagemArray()
+
+        if self.montagem == None:
+            self.montagem = child
+            self.scope = child
+        else:
+            scope = self.montagem.scope()
+            if scope == self.montagem:
+                self.montagem.child = child
+                scope = child
+            else:
+                self.scope = scope
+
+    def closeScope(self):
+        self.montagem = None
+        pass
+    def injectVideo(self, filename):
+        if self.cmd == 'concat':
+            video = VideoFileClip(f"{Config.OUTPUT}/{filename}.webm")
+            self.scope.add(video)
+        pass
+    def compile(self):
+        self.scope.compile(self.output)
+    def hasScopeOpened(self):
+        return self.montagem != None
+
+class Montagem:
+    def __init__(self):
+        self.repo = []
+        self.child = None
+    def openScope(self):
+        self.child = []
+    def closeScope(self):
+        self.child = None
+    def hasChild(self):
+        return self.child != None
+    def scope(self):
+        if self.child == None:
+            return self
+        else:
+            return self.child.scope()
+    def add(self, video):
+        self.repo.append(video)
+
+class MontagemConcat(Montagem):
+    def __init__(self):
+        super().__init__()
+        self.child = None
+        pass
+    def compile(self, output):
+        result = concatenate_videoclips(self.repo)
+        result.write_videofile(f"{Config.OUTPUT}/{output}.webm")
 
 
 
-
+class MontagemArray(Montagem):
+    def __init__(self):
+        pass
 
 
 

@@ -1,11 +1,6 @@
 from utils import convertDesc
-from utils.prep import MyCut
 from model import Video
-import yt_dlp
-import random
-import shutil
 import sys
-import os
 
 # Lê roteiro.raw
 def nmain(froteiro):

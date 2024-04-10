@@ -1,8 +1,10 @@
 from utils.prep import MyCut
 from moviepy.editor import *
+from PIL import Image
 import yt_dlp
 import random
 import shutil
+import math
 import os
 
 class Video:
@@ -80,7 +82,6 @@ class Cut:
             else:
                 arquivo = f"{item}.webm"
                 if not os.path.exists(os.path.abspath(f"{Config.OUTPUT}/{arquivo}")):
-                    breakpoint()
                     raise FileNotFoundError(f"Arquivo {arquivo} não encontrado em /{Config.OUTPUT}/!")
                 arquivos.append(arquivo)
         self.arquivos = arquivos
@@ -101,10 +102,124 @@ class Cut:
 
 
 
+class MontagemBuilder:
+    def __init__(self):
+        self.cmd = None
+        self.montagem = None
+        self.scope = None
+
+    def state(self, cmd):
+        stream = cmd.split(" ")
+        self.cmd = stream[0]
+        self.output = None
+        if len(stream) > 1:
+            self.output = stream[1]
+        pass
+
+    def openScope(self):
+        child = None
+        if self.cmd == 'concat':
+            child = MontagemConcat()
+        elif self.cmd == 'array':
+            child = MontagemArray()
+
+        if self.montagem == None:
+            self.montagem = child
+            self.scope = child
+        else:
+            scope = self.montagem.scope()
+            if scope == self.montagem:
+                self.montagem.child = child
+                scope = child
+            else:
+                self.scope = scope
+
+    def closeScope(self):
+        self.montagem = None
+        pass
+    def injectVideo(self, filename):
+        if self.cmd == 'concat':
+            video = VideoFileClip(f"{Config.OUTPUT}/{filename}.webm")
+            self.scope.add(video)
+        elif self.cmd == 'array':
+            video = VideoFileClip(f"{Config.OUTPUT}/{filename}.webm")
+            self.scope.add(video)
+        pass
+    def compile(self):
+        self.scope.compile(self.output)
+    def hasScopeOpened(self):
+        return self.montagem != None
+
+class Montagem:
+    def __init__(self):
+        self.repo = []
+        self.child = None
+    def openScope(self):
+        self.child = []
+    def closeScope(self):
+        self.child = None
+    def hasChild(self):
+        return self.child != None
+    def scope(self):
+        if self.child == None:
+            return self
+        else:
+            return self.child.scope()
+    def add(self, video):
+        self.repo.append(video)
+
+class MontagemConcat(Montagem):
+    def __init__(self):
+        super().__init__()
+        self.child = None
+        pass
+    def compile(self, output):
+
+        width = 0
+        for video in self.repo:
+            if width > video.size[0]:
+                width = video.size[0]
+
+        for video in self.repo:
+            video.resize(width=width)
+
+        result = concatenate_videoclips(self.repo)
+        result.write_videofile(f"{Config.OUTPUT}/{output}.webm")
 
 
 
+class MontagemArray(Montagem):
+    def __init__(self):
+        super().__init__()
+        pass
+    def compile(self, output):
+        lado = math.floor(math.sqrt(len(self.repo)))
+        repo = []
+        for x in range(lado):
+            inner = []
+            for y in range(lado):
+                inner.append(self.repo[(x*2)+(x+y)])
+            repo.append(inner)
 
+        mWidth = 0
+        mHeight = 0
+
+        for x in range(lado):
+            for y in range(lado):
+                width = repo[x][y].size[0]
+                height = repo[x][y].size[1]
+                if width > mWidth:
+                    mWidth = width
+                if height > mHeight:
+                    mHeight = height
+                
+        for x in range(lado):
+            for y in range(lado):
+                repo[x][y] = repo[x][y].resize(width=mWidth)
+                print(f"### FRAME {x},{y}: {repo[x][y].filename}")
+
+        result = clips_array(repo)
+        result.write_videofile(f"{Config.OUTPUT}/{output}.webm")
 
 
 

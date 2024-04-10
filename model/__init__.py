@@ -34,14 +34,19 @@ class Video:
         os.makedirs(tmp_dir)
         
         ydl_opts = {
-            'paths': {'home': tmp_dir}
+            'paths': {'home': tmp_dir},
+            'quiet': True,
+            # 'format': 'vext'
         }
         ydl = yt_dlp.YoutubeDL(ydl_opts)
         ydl.download(self.link)
 
         arquivo = os.listdir(tmp_dir)[0]
         sarquivo = arquivo.split(".")
-        sarquivo[0] = self.root
+        ext = sarquivo[len(sarquivo)-1]
+        sarquivo = []
+        sarquivo.append(self.root)
+        sarquivo.append(ext)
         sarquivo = ".".join(sarquivo)
 
         src = os.path.abspath("/".join([tmp_dir, arquivo]))

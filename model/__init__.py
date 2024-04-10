@@ -174,6 +174,15 @@ class MontagemConcat(Montagem):
         self.child = None
         pass
     def compile(self, output):
+
+        width = 0
+        for video in self.repo:
+            if width > video.size[0]:
+                width = video.size[0]
+
+        for video in self.repo:
+            video.resize(width=width)
+
         result = concatenate_videoclips(self.repo)
         result.write_videofile(f"{Config.OUTPUT}/{output}.webm")
 
@@ -189,7 +198,7 @@ class MontagemArray(Montagem):
         for x in range(lado):
             inner = []
             for y in range(lado):
-                inner.append(self.repo[(x+1)*(y)])
+                inner.append(self.repo[(x*2)+(x+y)])
             repo.append(inner)
 
         mWidth = 0
@@ -207,6 +216,7 @@ class MontagemArray(Montagem):
         for x in range(lado):
             for y in range(lado):
                 repo[x][y] = repo[x][y].resize(width=mWidth)
+                print(f"### FRAME {x},{y}: {repo[x][y].filename}")
 
         result = clips_array(repo)
         result.write_videofile(f"{Config.OUTPUT}/{output}.webm")

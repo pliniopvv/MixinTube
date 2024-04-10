@@ -48,6 +48,7 @@ def toggleScope(linha):
         raise IndexError("Comando equivocado para o escopo!")
     
 def addScoped(linha):
+    # print(f"#### {builder.cmd} vídeo injetado: {linha}")
     builder.injectVideo(linha)
 
 

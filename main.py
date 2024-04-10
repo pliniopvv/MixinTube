@@ -1,3 +1,4 @@
+from utils import convertDesc
 from utils.prep import MyCut
 from model import Video
 import yt_dlp
@@ -7,19 +8,6 @@ import sys
 import os
 
 # Lê roteiro.raw
-def main():
-    roteiro = open("roteiro.raw", "r", encoding="UTF-8")
-    content = roteiro.readlines()
-    for line in content:
-        parse = line.split(" ")
-        link = parse[0]
-        init = parse[1]
-        end  = parse[2]
-        desc = "_".join(parse[3:(len(parse))])
-
-        step2(link, desc)
-        step3(desc, init, end)
-
 def nmain(froteiro):
     roteiro = open(froteiro, "r", encoding="UTF-8")
     content = roteiro.readlines()
@@ -34,7 +22,8 @@ def nmain(froteiro):
         video.link = parse[1]
         video.start = parse[2]
         video.end  = parse[3]
-        video.descricao = "_".join(parse[4:(len(parse))]).replace("\r\n","").replace("\n","").replace("?","").replace(",","").replace(".","")
+        # video.descricao = "_".join(parse[4:(len(parse))]).replace("\r\n","").replace("\n","").replace("?","").replace(",","").replace(".","")
+        video.descricao = convertDesc(parse[4:(len(parse))])
         lista.append(video)
 
     for video in lista:

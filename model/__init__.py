@@ -1,4 +1,5 @@
 from utils.prep import MyCut
+from moviepy.editor import *
 import yt_dlp
 import random
 import shutil
@@ -55,6 +56,65 @@ class Video:
         file = os.path.abspath("/".join([Config.OUTPUT, f"{self.root}.webm"]))
         cut = MyCut(file, self.start, self.end)
         cut.save(self.descricao)
+
+
+
+
+
+
+
+
+
+
+
+
+
+class Cut:
+    def __init__(self, parametros):
+        arquivos = []
+        key = -1
+        for item in parametros:
+            key += 1
+            if key == 0:
+                self.output = item
+            else:
+                arquivo = f"{item}.webm"
+                if not os.path.exists(os.path.abspath(f"{Config.OUTPUT}/{arquivo}")):
+                    breakpoint()
+                    raise FileNotFoundError(f"Arquivo {arquivo} não encontrado em /{Config.OUTPUT}/!")
+                arquivos.append(arquivo)
+        self.arquivos = arquivos
+
+    def compile(self):
+        videos = []
+
+        for arquivo in self.arquivos:
+            video = VideoFileClip(f"{Config.OUTPUT}/{arquivo}")
+            videos.append(video)
+
+        result = concatenate_videoclips(videos)
+        result.write_videofile(f"{Config.OUTPUT}/{self.output}.webm")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 class Config:

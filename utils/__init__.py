@@ -1,3 +1,4 @@
+import sys, os
 
 def convertDesc(desc):
     return "_".join(desc.split(" ")).replace("\r\n","").replace("\n","").replace("?","").replace(",","").replace(".","")
@@ -16,3 +17,19 @@ def clearUTF8(linha):
         .replace(".","")
         .strip()
         )
+
+def blockPrint():
+    sys.stdout = open(os.devnull, "w")
+
+def enablePrint():
+    sys.stdout = sys.__stdout__
+
+def log(msg):
+    enablePrint()
+    print(msg)
+    blockPrint()
+
+def logr(msg):
+    enablePrint()
+    print(msg, end="\r")
+    blockPrint()

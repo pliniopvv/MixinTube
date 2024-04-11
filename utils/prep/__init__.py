@@ -1,4 +1,5 @@
 from moviepy.editor import *
+from utils import enablePrint
 
 class MyCut:
     def __init__(self, arquivo, inicio, fim):

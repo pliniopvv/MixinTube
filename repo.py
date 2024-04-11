@@ -23,7 +23,7 @@ def nmain(froteiro):
         # video.descricao = convertDesc(parse[4:(len(parse))])
         lista.append(video)
 
-    log(f"Arquivos Base -----------------------------------------------")
+    log(f"----------------------------------------------- Arquivos Base")
 
     for video in lista:
         if not video.rootExists():
@@ -33,7 +33,7 @@ def nmain(froteiro):
         else:
             log(f"v {video.root}")
     
-    log(f"Recortes ----------------------------------------------------")
+    log(f"---------------------------------------------------- Recortes")
 
     for video in lista:
         if not video.exists():
@@ -46,4 +46,4 @@ def nmain(froteiro):
 if __name__ == "__main__":
     # step2(URL='https://www.youtube.com/watch?v=hbXljW9FnCc', filename="teste")
     nmain(sys.argv[1])
-    log(f"Fim ----------------------------------------------------------")
+    log(f"---------------------------------------------------------- Fim")

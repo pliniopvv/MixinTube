@@ -37,11 +37,12 @@ class Video:
         
         ydl_opts = {
             'paths': {'home': tmp_dir},
-            'format': 'webm',
+            # 'format': 'webm',
             'quiet': True,
+            'consoletitle': True,
             # 'format': 'vext'
         }
-        logr(f"o {self.root} - Baixando vídeo")
+        logr(f"o {self.root} - Baixando vídeo              ")
         ydl = yt_dlp.YoutubeDL(ydl_opts)
         ydl.download(self.link)
 
@@ -64,7 +65,7 @@ class Video:
         return sarquivo
     
     def process(self):
-        logr(f"o {self.descricao} - Recortando. \r")
+        logr(f"o {self.descricao} - Recortando.")
         if (self.rootfile == None): self.rootfile = f"{self.root}.webm"
         file = os.path.abspath("/".join([Config.OUTPUT, f"{self.root}.webm"]))
         cut = MyCut(file, self.start, self.end)
@@ -124,6 +125,7 @@ class MontagemBuilder:
     def state(self, cmd):
         stream = cmd.split(" ")
         self.cmd = stream[0]
+        log(f"------------------------- Exec {stream[0]}")
         self.output = None
         if len(stream) > 1:
             self.output = stream[1]
@@ -151,15 +153,28 @@ class MontagemBuilder:
         self.montagem = None
         pass
     def injectVideo(self, filename):
+        arquivo = f"{Config.OUTPUT}/{filename}.webm"
+        if not os.path.exists(os.path.abspath(arquivo)):
+            log(f"x {filename}.webm - Arquivo não localizado!")
+        else:
+            log(f"v {filename}.webm")
         if self.cmd == 'concat':
-            video = VideoFileClip(f"{Config.OUTPUT}/{filename}.webm")
+            video = VideoFileClip(arquivo)
             self.scope.add(video)
         elif self.cmd == 'array':
             video = VideoFileClip(f"{Config.OUTPUT}/{filename}.webm")
             self.scope.add(video)
         pass
     def compile(self):
-        self.scope.compile(self.output)
+        aOutput = f"{Config.OUTPUT}/{self.output}.webm"
+        log(f"------------------------- Operação de montagem")
+        if not os.path.exists(os.path.abspath(aOutput)):
+            logr(f"o {self.output}.webm - Iniciando montagem")
+            self.scope.compile(aOutput)
+            log(f"v {self.output}.webm - Montado")
+        else:
+            log(f"v {self.output}.webm - já disponível no repositório!")
+            self.scope.close()
     def hasScopeOpened(self):
         return self.montagem != None
 
@@ -173,6 +188,9 @@ class Montagem:
         self.child = None
     def hasChild(self):
         return self.child != None
+    def close(self):
+        for video in self.repo:
+            video.close()
     def scope(self):
         if self.child == None:
             return self
@@ -190,14 +208,14 @@ class MontagemConcat(Montagem):
 
         width = 0
         for video in self.repo:
-            if width > video.size[0]:
+            if video.size[0] > width:
                 width = video.size[0]
 
         for video in self.repo:
             video.resize(width=width)
 
         result = concatenate_videoclips(self.repo)
-        result.write_videofile(f"{Config.OUTPUT}/{output}.webm")
+        result.write_videofile(output)
 
 
 
@@ -229,10 +247,9 @@ class MontagemArray(Montagem):
         for x in range(lado):
             for y in range(lado):
                 repo[x][y] = repo[x][y].resize(width=mWidth)
-                print(f"### FRAME {x},{y}: {repo[x][y].filename}")
 
         result = clips_array(repo)
-        result.write_videofile(f"{Config.OUTPUT}/{output}.webm")
+        result.write_videofile(output)
 
 
 

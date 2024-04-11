@@ -37,7 +37,7 @@ def nmain(froteiro):
 
     for video in lista:
         if not video.exists():
-            logr(f"o {video.descricao} - Recorte não localizado. \r")
+            logr(f"o {video.descricao} - Recorte não localizado.")
             video.process()
             log(f"v {video.descricao}")
         else:

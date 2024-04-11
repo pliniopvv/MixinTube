@@ -1,5 +1,5 @@
 from model import Montagem, MontagemBuilder
-from utils import clearUTF8, format_filename
+from utils import clearUTF8, format_filename, log, logr
 import sys
 import os
 
@@ -9,6 +9,8 @@ def main(froteiro):
     global builder
     stream = open(froteiro, "r", encoding="UTF-8")
     linhas = stream.readlines()
+    log(f"#### {froteiro} ####")
+    log(f"")
     for linha in linhas:
         clinha = clearUTF8(linha)
         if isCmd(clinha):
@@ -41,6 +43,7 @@ def isCloseScope(linha):
 
 def toggleScope(linha):
     if linha == '[':
+        log(f"------------------------- Adicionando arquivos")
         builder.openScope()
     elif linha == ']':
         builder.closeScope()

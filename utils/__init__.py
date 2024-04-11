@@ -1,4 +1,3 @@
-
 def convertDesc(desc):
     return "_".join(desc.split(" ")).replace("\r\n","").replace("\n","").replace("?","").replace(",","").replace(".","")
 
@@ -16,3 +15,6 @@ def clearUTF8(linha):
         .replace(".","")
         .strip()
         )
+
+def log(msg):
+    print(msg)

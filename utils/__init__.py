@@ -18,3 +18,6 @@ def clearUTF8(linha):
 
 def log(msg):
     print(msg)
+
+def logr(msg):
+    print(msg, end="\r")

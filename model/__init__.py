@@ -1,6 +1,6 @@
+from utils import log, logr
 from utils.prep import MyCut
 from moviepy.editor import *
-from PIL import Image
 import yt_dlp
 import random
 import shutil
@@ -25,6 +25,7 @@ class Video:
         return self.file != None
     
     def download(self):
+        logr(f"o {self.root} - Criando pasta temporária")
         tmp_dir = f"tmp_{random.randrange(start=1000, stop=9999)}"
         exists = os.path.exists(tmp_dir)
 
@@ -33,14 +34,18 @@ class Video:
             exists = os.path.exists(tmp_dir)
         os.makedirs(tmp_dir)
         
+        
         ydl_opts = {
             'paths': {'home': tmp_dir},
+            'format': 'webm',
             'quiet': True,
             # 'format': 'vext'
         }
+        logr(f"o {self.root} - Baixando vídeo")
         ydl = yt_dlp.YoutubeDL(ydl_opts)
         ydl.download(self.link)
 
+        logr(f"o {self.root} - Organizando")
         arquivo = os.listdir(tmp_dir)[0]
         sarquivo = arquivo.split(".")
         ext = sarquivo[len(sarquivo)-1]
@@ -59,10 +64,13 @@ class Video:
         return sarquivo
     
     def process(self):
+        logr(f"o {self.descricao} - Recortando. \r")
         if (self.rootfile == None): self.rootfile = f"{self.root}.webm"
         file = os.path.abspath("/".join([Config.OUTPUT, f"{self.root}.webm"]))
         cut = MyCut(file, self.start, self.end)
         cut.save(self.descricao)
+
+
 
 
 

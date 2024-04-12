@@ -27,7 +27,7 @@ def main(froteiro):
 
 def isCmd(linha):
     stream = linha.split(" ")
-    return stream[0] in ['concat', 'array']
+    return stream[0] in ['concat', 'array', 'midnight']
 
 def setCmd(linha):
     builder.state(linha)
@@ -51,7 +51,6 @@ def toggleScope(linha):
         raise IndexError("Comando equivocado para o escopo!")
     
 def addScoped(linha):
-    # print(f"#### {builder.cmd} vídeo injetado: {linha}")
     builder.injectVideo(linha)
 
 

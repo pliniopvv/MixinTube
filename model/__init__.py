@@ -1,4 +1,4 @@
-from utils import log, logr
+from utils import log, logr, enablePrint
 from utils.prep import MyCut
 from moviepy.editor import *
 import yt_dlp
@@ -137,6 +137,8 @@ class MontagemBuilder:
             child = MontagemConcat()
         elif self.cmd == 'array':
             child = MontagemArray()
+        elif self.cmd == 'midnight':
+            child = MontagemMidnight()
 
         if self.montagem == None:
             self.montagem = child
@@ -154,16 +156,17 @@ class MontagemBuilder:
         pass
     def injectVideo(self, filename):
         arquivo = f"{Config.OUTPUT}/{filename}.webm"
+        _video = VideoFileClip(arquivo)
         if not os.path.exists(os.path.abspath(arquivo)):
             log(f"x {filename}.webm - Arquivo não localizado!")
         else:
             log(f"v {filename}.webm")
         if self.cmd == 'concat':
-            video = VideoFileClip(arquivo)
-            self.scope.add(video)
+            self.scope.add(_video)
         elif self.cmd == 'array':
-            video = VideoFileClip(f"{Config.OUTPUT}/{filename}.webm")
-            self.scope.add(video)
+            self.scope.add(_video)
+        elif self.cmd == 'midnight':
+            self.scope.add(_video)
         pass
     def compile(self):
         aOutput = f"{Config.OUTPUT}/{self.output}.webm"
@@ -251,9 +254,50 @@ class MontagemArray(Montagem):
         result = clips_array(repo)
         result.write_videofile(output)
 
+class MontagemMidnight(Montagem):
+    def __init__(self):
+        super().__init__()
+        pass
+    def compile(self, output):
+        mWidth = 0
+        mHeight = 0
 
+        for video in self.repo:
+            width = video.size[0]
+            height = video.size[1]
+            if width > mWidth:
+                mWidth = width
+            if height > mHeight:
+                mHeight = height
 
+        totaltime = 0
+        for video in self.repo:
+            totaltime += video.duration
 
+        repo = []
+        cont = -1
+        for video in self.repo:
+            cont += 1
+            
+            itfreeze = cvsecs(0.1)
+            ftfreeze = cvsecs(video.duration-0.1)
+            i_im_freeze = video.to_ImageClip(itfreeze).fx(vfx.blackwhite)
+            f_im_freeze = video.to_ImageClip(ftfreeze)
+
+            before = True
+            fconcat = []
+            for _video in self.repo:
+                if video == _video:
+                    fconcat.append(video)
+                elif before:
+                    fconcat.append(i_im_freeze.set_duration(_video.duration))
+                else:
+                    fconcat.append(f_im_freeze.set_duration(_video.duration))
+            concat = concatenate_videoclips(fconcat)
+            repo.append([concat])
+
+        result = clips_array(repo)
+        result.write_videofile(output)
 
 
 

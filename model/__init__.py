@@ -275,44 +275,26 @@ class MontagemMidnight(Montagem):
             totaltime += video.duration
 
         repo = []
-        totalvideos = len(self.repo)
         cont = -1
         for video in self.repo:
             cont += 1
             
             itfreeze = cvsecs(0.1)
             ftfreeze = cvsecs(video.duration-0.1)
-            i_im_freeze = video.to_ImageClip(itfreeze)
+            i_im_freeze = video.to_ImageClip(itfreeze).fx(vfx.blackwhite)
             f_im_freeze = video.to_ImageClip(ftfreeze)
-        
-            if cont == 0:
-                dfreeze = totaltime - video.duration
-                concat = concatenate_videoclips([video, f_im_freeze.set_duration(dfreeze)])
-                repo.append([concat])
-            else:
-                dfreeze = totaltime - video.duration
-                concat = concatenate_videoclips([i_im_freeze.set_duration(dfreeze), video])
-                repo.append([concat])
 
-            # itfreeze = cvsecs(0.1)
-            # ftfreeze = cvsecs(video.duration-0.1)
-            # i_im_freeze = video.to_ImageClip(itfreeze)
-            # f_im_freeze = video.to_ImageClip(ftfreeze)
-
-            # enablePrint()
-            # breakpoint()
-            
-            # concat = []
-            # after = False                                           # a=f       |
-            # for _video in self.repo:                                # 1v 1v     | 1v 2v
-            #     if video == _video:                                 # 1v = 1v   | 1v != 2v
-            #         concat.append(video)                            # [1v]      |
-            #         after = True                                    # a=t       |
-            #     elif not after:                                     #           | a=t
-            #         concat.append(i_im_freeze.set_duration(_video.duration))    #   
-            #     elif after:                                         #
-            #         concat.append(f_im_freeze.set_duration(_video.duration))    #   | [1v,freeze.2v.duration]
-            # repo.append(concat)
+            before = True
+            fconcat = []
+            for _video in self.repo:
+                if video == _video:
+                    fconcat.append(video)
+                elif before:
+                    fconcat.append(i_im_freeze.set_duration(_video.duration))
+                else:
+                    fconcat.append(f_im_freeze.set_duration(_video.duration))
+            concat = concatenate_videoclips(fconcat)
+            repo.append([concat])
 
         result = clips_array(repo)
         result.write_videofile(output)

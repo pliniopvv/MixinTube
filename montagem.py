@@ -27,7 +27,7 @@ def main(froteiro):
 
 def isCmd(linha):
     stream = linha.split(" ")
-    return stream[0] in ['concat', 'array']
+    return stream[0] in ['concat', 'array', 'midnight']
 
 def setCmd(linha):
     builder.state(linha)

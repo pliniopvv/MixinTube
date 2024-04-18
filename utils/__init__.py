@@ -15,6 +15,11 @@ def clearUTF8(linha):
         .replace("?","")
         .replace(",","")
         .replace(".","")
+        .replace("á","a")
+        .replace("é","e")
+        .replace("í","i")
+        .replace("ó","o")
+        .replace("ú","u")
         .strip()
         )
 

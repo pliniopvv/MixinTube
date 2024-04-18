@@ -27,7 +27,7 @@ def nmain(froteiro):
 
     for video in lista:
         if not video.rootExists():
-            logr(f"o {video.root} - Iniciando download\r")
+            logr(f"o {video.root} - Iniciando download")
             video.download()
             log(f"v {video.root}")
         else:

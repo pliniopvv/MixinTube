@@ -68,6 +68,7 @@ class Video:
         logr(f"o {self.descricao} - Recortando.")
         if (self.rootfile == None): self.rootfile = f"{self.root}.webm"
         file = os.path.abspath("/".join([Config.OUTPUT, f"{self.root}.webm"]))
+        if (self.start == self.end): return None
         cut = MyCut(file, self.start, self.end)
         cut.save(self.descricao)
 
@@ -224,7 +225,8 @@ class MontagemConcat(Montagem):
         result = concatenate_videoclips(repo)
         result.write_videofile(output)
 
-
+# env\Scripts\activate && python montagem.py raw\montagem\montagem.raw
+# cls && python montagem.py raw\montagem\montagem.raw
 
 class MontagemArray(Montagem):
     def __init__(self):

@@ -210,14 +210,18 @@ class MontagemConcat(Montagem):
     def compile(self, output):
 
         width = 0
+        height = 0
         for video in self.repo:
             if video.size[0] > width:
                 width = video.size[0]
+            if video.size[1] > height:
+                height = video.size[1]
 
+        repo = []
         for video in self.repo:
-            video.resize(width=width)
+            repo.append(video.resize((width, height)))
 
-        result = concatenate_videoclips(self.repo)
+        result = concatenate_videoclips(repo)
         result.write_videofile(output)
 
 
@@ -249,7 +253,7 @@ class MontagemArray(Montagem):
                 
         for x in range(lado):
             for y in range(lado):
-                repo[x][y] = repo[x][y].resize(width=mWidth)
+                repo[x][y] = repo[x][y].resize((mWidth, mHeight))
 
         result = clips_array(repo)
         result.write_videofile(output)
@@ -275,7 +279,11 @@ class MontagemMidnight(Montagem):
             totaltime += video.duration
 
         repo = []
+        for video in self.repo:
+            repo.append(video.resize((width, height)))
+
         cont = -1
+        repo2 = []
         for video in self.repo:
             cont += 1
             
@@ -294,9 +302,9 @@ class MontagemMidnight(Montagem):
                 else:
                     fconcat.append(f_im_freeze.set_duration(_video.duration))
             concat = concatenate_videoclips(fconcat)
-            repo.append([concat])
+            repo2.append([concat])
 
-        result = clips_array(repo)
+        result = clips_array(repo2)
         result.write_videofile(output)
 
 

@@ -1,6 +1,7 @@
 from utils import log, logr, enablePrint
 from utils.prep import MyCut
 from moviepy.editor import *
+from pyffmpeg import FFmpeg
 import yt_dlp
 import random
 import shutil
@@ -50,6 +51,9 @@ class Video:
         arquivo = os.listdir(tmp_dir)[0]
         sarquivo = arquivo.split(".")
         ext = sarquivo[len(sarquivo)-1]
+
+
+
         sarquivo = []
         sarquivo.append(self.root)
         sarquivo.append(ext)
@@ -62,6 +66,17 @@ class Video:
         shutil.rmtree(tmp_dir)
         
         self.rootfile = sarquivo
+
+        if ext != "webm":
+            nsrc = dest
+            old_ext = dest.split(".")
+            ndest = f"{old_ext[0]}.webm"
+
+            logr(f"o {self.root} - Convertendo de mkv")
+            ff = FFmpeg()
+            ff.convert(nsrc, ndest)
+            return ndest
+
         return sarquivo
     
     def process(self):

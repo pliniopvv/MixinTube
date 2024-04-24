@@ -1,5 +1,5 @@
 from model import Montagem, MontagemBuilder
-from utils import clearUTF8, format_filename, log, logr
+from utils import clearUTF8, format_filename, log, logr, enablePrint
 import sys
 import os
 
@@ -27,7 +27,7 @@ def main(froteiro):
 
 def isCmd(linha):
     stream = linha.split(" ")
-    return stream[0] in ['concat', 'array', 'midnight']
+    return stream[0] in ['concat', 'array', 'midnight', 'concat:text']
 
 def setCmd(linha):
     builder.state(linha)
@@ -51,9 +51,14 @@ def toggleScope(linha):
         raise IndexError("Comando equivocado para o escopo!")
     
 def addScoped(linha):
-    builder.injectVideo(linha)
-
-
+    video = linha
+    efeito = None
+    if ":" in builder.cmd:
+        split = linha.split("|")
+        video = split[0]
+        if (len(split) > 1):
+            efeito = split[1]
+    builder.injectVideo(video, efeito)
 
 if __name__ == '__main__':
     main(sys.argv[1])

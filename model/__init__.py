@@ -1,6 +1,7 @@
 from utils import log, logr, enablePrint
 from utils.prep import MyCut
 from moviepy.editor import *
+from pyffmpeg import FFmpeg
 import yt_dlp
 import random
 import shutil
@@ -25,7 +26,7 @@ class Video:
         return self.file != None
     
     def download(self):
-        logr(f"o {self.root} - Criando pasta temporária")
+        logr(f"o {self.root} - Criando pasta temporária                ")
         tmp_dir = f"tmp_{random.randrange(start=1000, stop=9999)}"
         exists = os.path.exists(tmp_dir)
 
@@ -50,6 +51,9 @@ class Video:
         arquivo = os.listdir(tmp_dir)[0]
         sarquivo = arquivo.split(".")
         ext = sarquivo[len(sarquivo)-1]
+
+
+
         sarquivo = []
         sarquivo.append(self.root)
         sarquivo.append(ext)
@@ -62,6 +66,17 @@ class Video:
         shutil.rmtree(tmp_dir)
         
         self.rootfile = sarquivo
+
+        if ext != "webm":
+            nsrc = dest
+            old_ext = dest.split(".")
+            ndest = f"{old_ext[0]}.webm"
+
+            logr(f"o {self.root} - Convertendo de mkv                    ")
+            ff = FFmpeg()
+            ff.convert(nsrc, ndest)
+            return ndest
+
         return sarquivo
     
     def process(self):
@@ -140,6 +155,8 @@ class MontagemBuilder:
             child = MontagemArray()
         elif self.cmd == 'midnight':
             child = MontagemMidnight()
+        elif self.cmd == 'concat:text':
+            child = MontagemConcatWithText()
 
         if self.montagem == None:
             self.montagem = child
@@ -155,9 +172,17 @@ class MontagemBuilder:
     def closeScope(self):
         self.montagem = None
         pass
-    def injectVideo(self, filename):
+    def injectVideo(self, filename, efeito = None):
         arquivo = f"{Config.OUTPUT}/{filename}.webm"
         _video = VideoFileClip(arquivo)
+        _effect = None
+        if efeito != None:
+            if "text" in self.cmd:
+                _effect = (
+                    TextClip(efeito, fontsize=200, color="yellow")
+                    .set_position(("center","top"))
+                    .set_duration(_video.duration)
+                    )
         if not os.path.exists(os.path.abspath(arquivo)):
             log(f"x {filename}.webm - Arquivo não localizado!")
         else:
@@ -168,6 +193,9 @@ class MontagemBuilder:
             self.scope.add(_video)
         elif self.cmd == 'midnight':
             self.scope.add(_video)
+        elif self.cmd == 'concat:text':
+            self.scope.add(_video)
+            self.scope.params(_effect)
         pass
     def compile(self):
         aOutput = f"{Config.OUTPUT}/{self.output}.webm"
@@ -185,6 +213,7 @@ class MontagemBuilder:
 class Montagem:
     def __init__(self):
         self.repo = []
+        self.effect = []
         self.child = None
     def openScope(self):
         self.child = []
@@ -202,6 +231,8 @@ class Montagem:
             return self.child.scope()
     def add(self, video):
         self.repo.append(video)
+    def params(self, efeito):
+        self.effect.append(efeito)
 
 class MontagemConcat(Montagem):
     def __init__(self):
@@ -209,7 +240,6 @@ class MontagemConcat(Montagem):
         self.child = None
         pass
     def compile(self, output):
-
         width = 0
         height = 0
         for video in self.repo:
@@ -224,9 +254,6 @@ class MontagemConcat(Montagem):
 
         result = concatenate_videoclips(repo)
         result.write_videofile(output)
-
-# env\Scripts\activate && python montagem.py raw\montagem\montagem.raw
-# cls && python montagem.py raw\montagem\montagem.raw
 
 class MontagemArray(Montagem):
     def __init__(self):
@@ -264,6 +291,7 @@ class MontagemMidnight(Montagem):
     def __init__(self):
         super().__init__()
         pass
+
     def compile(self, output):
         mWidth = 0
         mHeight = 0
@@ -309,8 +337,35 @@ class MontagemMidnight(Montagem):
         result = clips_array(repo2)
         result.write_videofile(output)
 
+class MontagemConcatWithText(Montagem):
+    def __init__(self):
+        super().__init__()
+        pass
+    def resize(self):
+        width = 0
+        height = 0
+        for video in self.repo:
+            if video.size[0] > width:
+                width = video.size[0]
+            if video.size[1] > height:
+                height = video.size[1]
+        repo = []
+        for video in self.repo:
+            repo.append(video.resize((width, height)))
+        return repo
 
+    def compile(self, output):
+        repo = self.resize()
 
+        stack = []
+
+        index = -1
+        for video in repo:
+            index += 1
+            stack.append(CompositeVideoClip([repo[index], self.effect[index]]))
+
+        result = concatenate_videoclips(stack)
+        result.write_videofile(output)
 
 
 

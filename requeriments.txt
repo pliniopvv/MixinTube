@@ -14,6 +14,7 @@ numpy==1.26.4
 Pillow==9.5.0
 proglog==0.1.10
 pycryptodomex==3.20.0
+pyffmpeg==2.4.2.18.1
 requests==2.31.0
 soupsieve==2.5
 tqdm==4.66.2

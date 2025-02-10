@@ -37,6 +37,7 @@ def log(msg):
     blockPrint()
 
 def logr(msg):
-    enablePrint()
-    print(msg, end="\r")
-    blockPrint()
+    # enablePrint()
+    # print(msg, end="\r")
+    # blockPrint()
+    pass

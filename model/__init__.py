@@ -13,6 +13,8 @@ class Video:
     def __init__(self):
         self.rootfile = None
         self.file = None
+        self.progress_value = 0
+        self.cb_progress = None
         self.descricao = None
         pass
 
@@ -30,10 +32,22 @@ class Video:
             return True
         return self.file != None
     
-    def download(self):
+    def update_progress(self, d):
+        if d['status'] == 'finished':
+            self.downloaded_bytes = 100.0
+        elif d['status'] == 'downloading':
+            self.total_bytes = d['total_bytes']
+            self.downloaded_bytes = d['downloaded_bytes']
+        if self.cb_progress:
+            self.cb_progress(self.total_bytes, self.downloaded_bytes)
+
+    def download(self, cb_progress = None):
         logr(f"o {self.root} - Criando pasta temporária                ")
         tmp_dir = f"tmp_{random.randrange(start=1000, stop=9999)}"
         exists = os.path.exists(tmp_dir)
+
+        if cb_progress:
+            self.cb_progress = cb_progress
 
         while exists:
             tmp_dir = f"tmp_{random.randrange(start=1000, stop=9999)}"
@@ -47,6 +61,7 @@ class Video:
             'quiet': True,
             'consoletitle': True,
             # 'format': 'vext'
+            'progress_hooks': [self.update_progress]
         }
         logr(f"o {self.root} - Baixando vídeo              ")
         ydl = yt_dlp.YoutubeDL(ydl_opts)

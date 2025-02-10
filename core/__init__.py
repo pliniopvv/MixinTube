@@ -15,6 +15,10 @@ def parse_roteiro(froteiro):
         video = Video()
         video.root = principal
         video.link = parse[1]
+
+        if len(parse) == 2:
+            continue
+
         video.start = parse[2]
         video.end  = parse[3]
         video.descricao = "_".join(parse[4:(len(parse))]).replace("\r\n","").replace("\n","").replace("?","").replace(",","").replace(".","")

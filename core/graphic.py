@@ -52,7 +52,7 @@ class VideoView(HorizontalGroup):
             thread = Thread(target=self.video.download, args=[self.updateProgress])
             thread.start()
         elif id == "cut":
-            asyncio.run(self.video.download_cut(self.updateProgress))
+            asyncio.run(self.video.process(self.updateProgress))
             # self.query_one("cut").disabled = True
         self.refresh()
 

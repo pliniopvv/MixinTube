@@ -106,7 +106,8 @@ class Video:
 
         return sarquivo
     
-    def process(self):
+    def process(self, cb_progress):
+        self.cb_progress = cb_progress
         logr(f"o {self.descricao} - Recortando.")
         if (self.rootfile == None): self.rootfile = f"{self.root}.webm"
         file = os.path.abspath("/".join([Config.OUTPUT, f"{self.root}.webm"]))

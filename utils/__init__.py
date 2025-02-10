@@ -20,6 +20,8 @@ def clearUTF8(linha):
         .replace("í","i")
         .replace("ó","o")
         .replace("ú","u")
+        .replace("â","a")
+        .replace("ô","o")
         .strip()
         )
 

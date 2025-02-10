@@ -6,12 +6,14 @@ import yt_dlp
 import random
 import shutil
 import math
+import time
 import os
 
 class Video:
     def __init__(self):
         self.rootfile = None
         self.file = None
+        self.descricao = None
         pass
 
     def rootExists(self):
@@ -21,6 +23,9 @@ class Video:
             return self.rootfile != None
     
     def exists(self):
+        if (self.descricao == None):
+            return True
+
         if os.path.exists(os.path.abspath(f"{Config.OUTPUT}/{self.descricao}.webm")):
             return True
         return self.file != None
@@ -45,7 +50,11 @@ class Video:
         }
         logr(f"o {self.root} - Baixando vídeo              ")
         ydl = yt_dlp.YoutubeDL(ydl_opts)
-        ydl.download(self.link)
+        try:
+            ydl.download(self.link)
+        except Exception as e:
+            logr(f"x {self.root} - Erro ao baixar vídeo: {e} - prosseguindo")
+            return None
 
         logr(f"o {self.root} - Organizando")
         arquivo = os.listdir(tmp_dir)[0]
@@ -72,9 +81,12 @@ class Video:
             old_ext = dest.split(".")
             ndest = f"{old_ext[0]}.webm"
 
-            logr(f"o {self.root} - Convertendo de mkv                    ")
+            logr(f"o {self.root} - Convertendo de {ext}                    ")
             ff = FFmpeg()
+            ff.loglevel = 'info'
             ff.convert(nsrc, ndest)
+            ff = None
+            time.sleep(2)
             return ndest
 
         return sarquivo
@@ -86,8 +98,8 @@ class Video:
         if (self.start == self.end): return None
         cut = MyCut(file, self.start, self.end)
         cut.save(self.descricao)
-
-
+        cut = None
+        time.sleep(2)
 
 
 

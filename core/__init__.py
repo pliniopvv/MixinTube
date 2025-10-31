@@ -17,6 +17,7 @@ def parse_roteiro(froteiro):
         video.link = parse[1]
 
         if len(parse) == 2:
+            lista.append(video)
             continue
 
         video.start = parse[2]

@@ -106,8 +106,9 @@ class Video:
 
         return sarquivo
     
-    def process(self, cb_progress):
-        self.cb_progress = cb_progress
+    def process(self, cb_progress = None):
+        if (cb_progress != None):
+            self.cb_progress = cb_progress
         logr(f"o {self.descricao} - Recortando.")
         if (self.rootfile == None): self.rootfile = f"{self.root}.webm"
         file = os.path.abspath("/".join([Config.OUTPUT, f"{self.root}.webm"]))
@@ -202,7 +203,14 @@ class MontagemBuilder:
         pass
     def injectVideo(self, filename, efeito = None):
         arquivo = f"{Config.OUTPUT}/{filename}.webm"
-        _video = VideoFileClip(arquivo)
+        
+        _video = None
+        try:
+            _video = VideoFileClip(arquivo)
+        except Exception as e:
+            logr(f"x {filename}.webm - Erro ao carregar vídeo: {e}")
+            return None
+
         _effect = None
         if efeito != None:
             if "text" in self.cmd:
